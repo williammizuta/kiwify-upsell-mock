@@ -31,11 +31,11 @@
       <h2>Funil</h2>
       <ol class="funnel-diagram" aria-label="Etapas do funil">
         <li><span class="funnel-node">Checkout<br><small>produto principal</small></span></li>
-        <li><span class="funnel-node funnel-node-main">Upsell<br><small>oferta 1</small></span></li>
+        <li><span class="funnel-node funnel-node-main">Upsell 1<br><small>link-id</small></span></li>
         <li>
           <span class="funnel-branches">
-            <span class="funnel-node">Aceitou → <strong>Upsell 2</strong></span>
-            <span class="funnel-node">Recusou → <strong>Downsell</strong></span>
+            <span class="funnel-node">Aceitou → <strong>Upsell 2</strong> <small>upsell</small></span>
+            <span class="funnel-node">Recusou → <strong>Downsell</strong> <small>downsell</small></span>
           </span>
         </li>
         <li><span class="funnel-node">Área de membros<br><small>fim do funil</small></span></li>
@@ -43,19 +43,19 @@
 
       <form id="setup-form" class="setup-form" novalidate>
         <label class="field">
-          <span class="field-label">Upsell <span class="required">obrigatório</span></span>
-          <input name="upsell" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: oRA9f06" required>
+          <span class="field-label">Upsell 1 <code>link-id</code> <span class="required">obrigatório</span></span>
+          <input name="link-id" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: oRA9f06" required>
           <span class="field-hint">A primeira oferta, mostrada logo após o checkout.</span>
         </label>
         <label class="field">
-          <span class="field-label">Upsell 2 <span class="optional">opcional</span></span>
-          <input name="upsell2" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: h19tap2">
-          <span class="field-hint">Mostrada quando o comprador aceita o upsell.</span>
+          <span class="field-label">Upsell 2 <code>upsell</code> <span class="optional">opcional</span></span>
+          <input name="upsell" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: h19tap2">
+          <span class="field-hint">Mostrada quando o comprador aceita o upsell 1.</span>
         </label>
         <label class="field">
-          <span class="field-label">Downsell <span class="optional">opcional</span></span>
+          <span class="field-label">Downsell <code>downsell</code> <span class="optional">opcional</span></span>
           <input name="downsell" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: ArEBhhs">
-          <span class="field-hint">Mostrada quando o comprador recusa o upsell.</span>
+          <span class="field-hint">Mostrada quando o comprador recusa o upsell 1.</span>
         </label>
 
         <details class="setup-advanced">
@@ -84,7 +84,7 @@
     <section class="setup-card">
       <h2>URL da página de obrigado</h2>
       <p class="field-hint">Cole esta URL no produto principal. O checkout adiciona <code>token</code>, <code>code_senha</code> e os outros parâmetros.</p>
-      <output id="setup-url" class="setup-url" for="setup-form">Preencha o upsell para gerar a URL.</output>
+      <output id="setup-url" class="setup-url" for="setup-form">Preencha o link-id para gerar a URL.</output>
       <div class="setup-actions">
         <button id="setup-copy" class="button" type="button" disabled>Copiar URL</button>
         <a id="setup-preview" class="button button-secondary" href="#" aria-disabled="true">Abrir prévia sem token</a>

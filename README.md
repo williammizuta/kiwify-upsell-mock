@@ -4,7 +4,7 @@ Página de upsell de mentira para testar o **upsell de 1 clique** da Kiwify no a
 
 A página imita a página de obrigado de um produtor: uma landing page de vendas com o mesmo HTML que o
 *Gerador de upsell* do dashboard entrega ao produtor, mais o script `upsell-v2-dev`. Ela também monta um
-funil com **upsell**, **upsell 2** (depois de aceitar) e **downsell** (depois de recusar).
+funil com **upsell 1**, **upsell 2** (depois de aceitar) e **downsell** (depois de recusar).
 
 É um site estático: `index.html`, `styles.css` e `app.js`. Não tem build nem dependências.
 
@@ -13,7 +13,7 @@ funil com **upsell**, **upsell 2** (depois de aceitar) e **downsell** (depois de
 1. No dashboard de dev, crie as ofertas do funil e anote o **ID do link** de cada uma. É o código que o
    *Gerador de upsell* coloca no HTML: `kiwify-upsell-trigger-<ID>` (ex.: `oRA9f06`).
 2. Abra a página sem parâmetros. Ela mostra um formulário para montar o funil.
-3. Preencha o upsell (obrigatório), o upsell 2 e o downsell (opcionais). Se quiser, mude o texto e a cor
+3. Preencha o upsell 1 (obrigatório), o upsell 2 e o downsell (opcionais). Se quiser, mude o texto e a cor
    do botão, como no *Gerador de upsell*.
 4. Copie a URL gerada.
 5. No produto principal, em **Página de obrigado e upsell**, marque *Esse produto tem uma página de obrigado
@@ -26,12 +26,13 @@ compra de 1 clique não funciona sem `token`.
 ## Funil
 
 ```text
-Checkout ──▶ Upsell ──aceitou──▶ Upsell 2 ──▶ acesso ao produto
-                 │
-                 └──recusou───▶ Downsell ──▶ acesso ao produto
+Checkout ──▶ Upsell 1 ──aceitou──▶ Upsell 2 ──▶ acesso ao produto
+            (link-id) │            (upsell)
+                      └──recusou──▶ Downsell ──▶ acesso ao produto
+                                   (downsell)
 ```
 
-- O upsell usa `data-upsell-url` e `data-downsell-url` para apontar para esta mesma página, na etapa seguinte.
+- O upsell 1 usa `data-upsell-url` e `data-downsell-url` para apontar para esta mesma página, na etapa seguinte.
 - O upsell 2 e o downsell terminam o funil com o comportamento padrão da Kiwify: o script leva o comprador
   para `/student/password/<code_senha>` do dashboard de dev.
 - Sem upsell 2 ou sem downsell, o ramo correspondente também termina com o comportamento padrão.
@@ -42,10 +43,10 @@ Parâmetros que a página usa:
 
 | Parâmetro      | Obrigatório | Descrição                                                        |
 | -------------- | ----------- | ---------------------------------------------------------------- |
-| `upsell`       | sim         | ID do link da primeira oferta.                                   |
-| `upsell2`      | não         | ID do link mostrado depois que o comprador aceita o upsell.      |
-| `downsell`     | não         | ID do link mostrado depois que o comprador recusa o upsell.      |
-| `step`         | não         | Etapa atual: `upsell` (padrão), `upsell2` ou `downsell`. A própria página define este valor. |
+| `link-id`      | sim         | ID do link do upsell 1, a primeira oferta.                       |
+| `upsell`       | não         | ID do link do upsell 2, mostrado depois que o comprador aceita o upsell 1. |
+| `downsell`     | não         | ID do link do downsell, mostrado depois que o comprador recusa o upsell 1. |
+| `step`         | não         | Etapa atual: `link-id` (padrão), `upsell` ou `downsell`. A própria página define este valor. |
 | `accept-text`  | não         | Texto do botão de aceitar. Padrão: *Sim, eu aceito essa oferta especial!* |
 | `decline-text` | não         | Texto do link de recusar. Padrão: *Não, eu gostaria de recusar essa oferta* |
 | `color`        | não         | Cor do botão em hex (`#2563eb`). A página também usa esta cor como destaque. |

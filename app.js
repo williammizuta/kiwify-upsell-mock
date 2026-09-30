@@ -12,19 +12,20 @@
   const DEFAULT_DECLINE_TEXT = 'Não, eu gostaria de recusar essa oferta';
   // The link API returns "<product> -|- <offer>" in the name field.
   const NAME_SEPARATOR = ' -|- ';
-  const FUNNEL_STEPS = ['upsell', 'upsell2', 'downsell'];
+  const FIRST_STEP = 'link-id';
+  const FUNNEL_STEPS = [FIRST_STEP, 'upsell', 'downsell'];
   const LOOK_PARAMS = ['accept-text', 'decline-text', 'color'];
   const PAGE_PARAMS = FUNNEL_STEPS.concat(LOOK_PARAMS, ['step']);
 
   const STEP_COPY = {
-    upsell: {
-      label: 'Upsell',
+    'link-id': {
+      label: 'Upsell 1',
       banner: 'Pagamento aprovado! Não feche esta página: preparamos uma oferta exclusiva para você.',
       eyebrow: 'Espere! Seu pedido ainda não terminou',
       title: 'Leve também {product} com uma condição que só aparece agora',
       subtitle: 'Adicione ao seu pedido com 1 clique. Você não precisa digitar os dados do pagamento de novo.',
     },
-    upsell2: {
+    upsell: {
       label: 'Upsell 2',
       banner: 'Oferta adicionada ao seu pedido! Temos mais uma condição especial para você.',
       eyebrow: 'Parabéns pela decisão',
@@ -52,8 +53,8 @@
   function main() {
     const params = new URLSearchParams(window.location.search);
     const config = readConfig(params);
-    if (!config.funnel.upsell) {
-      showSetup(params, params.get('token') ? 'Esta página recebeu um token do checkout, mas a URL não informa o upsell.' : '');
+    if (!config.funnel[FIRST_STEP]) {
+      showSetup(params, params.get('token') ? 'Esta página recebeu um token do checkout, mas a URL não informa o link-id.' : '');
       return;
     }
 
@@ -79,7 +80,7 @@
       funnel: readFunnel(function (step) {
         return params.get(step) || '';
       }),
-      step: params.get('step') || 'upsell',
+      step: params.get('step') || FIRST_STEP,
       acceptText: limitText(params.get('accept-text')) || DEFAULT_ACCEPT_TEXT,
       declineText: limitText(params.get('decline-text')) || DEFAULT_DECLINE_TEXT,
       color: COLOR_PATTERN.test(color) ? color : DEFAULT_COLOR,
@@ -135,7 +136,7 @@
     Object.keys(look).forEach(function (name) {
       url.searchParams.set(name, look[name]);
     });
-    if (step !== 'upsell') {
+    if (step !== FIRST_STEP) {
       url.searchParams.set('step', step);
     }
     return url.toString();
@@ -150,11 +151,11 @@
 
   // Only the first upsell branches. Upsell 2 and downsell end the funnel with the Kiwify default.
   function findNextUrls(config) {
-    if (config.step !== 'upsell') {
+    if (config.step !== FIRST_STEP) {
       return { accept: '', decline: '' };
     }
     return {
-      accept: config.funnel.upsell2 ? buildFunnelUrl(config.funnel, config.look, 'upsell2') : '',
+      accept: config.funnel.upsell ? buildFunnelUrl(config.funnel, config.look, 'upsell') : '',
       decline: config.funnel.downsell ? buildFunnelUrl(config.funnel, config.look, 'downsell') : '',
     };
   }
@@ -216,12 +217,12 @@
 
   function renderProgress(config) {
     const labels = ['Pedido aprovado', 'Oferta especial'];
-    if (config.funnel.upsell2 || config.funnel.downsell) {
+    if (config.funnel.upsell || config.funnel.downsell) {
       labels.push('Última oferta');
     }
     labels.push('Acesso ao produto');
 
-    const current = config.step === 'upsell' ? 1 : 2;
+    const current = config.step === FIRST_STEP ? 1 : 2;
     const list = document.getElementById('progress-steps');
     labels.forEach(function (label, index) {
       const item = document.createElement('li');
@@ -500,15 +501,15 @@
     const copyButton = document.getElementById('setup-copy');
     const preview = document.getElementById('setup-preview');
 
-    if (!funnel.upsell || invalidSteps.length) {
-      output.textContent = invalidSteps.length ? describeInvalidSteps(invalidSteps) : 'Preencha o upsell para gerar a URL.';
+    if (!funnel[FIRST_STEP] || invalidSteps.length) {
+      output.textContent = invalidSteps.length ? describeInvalidSteps(invalidSteps) : 'Preencha o link-id para gerar a URL.';
       copyButton.disabled = true;
       preview.removeAttribute('href');
       preview.setAttribute('aria-disabled', 'true');
       return;
     }
 
-    const url = buildFunnelUrl(funnel, readLookFromForm(form), 'upsell');
+    const url = buildFunnelUrl(funnel, readLookFromForm(form), FIRST_STEP);
     output.textContent = url;
     copyButton.disabled = false;
     preview.href = url;
