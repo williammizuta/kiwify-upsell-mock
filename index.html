@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Oferta especial — mock de upsell Kiwify (dev)</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="mock-ribbon" role="note">
+    Página de teste do ambiente <strong>dev</strong> da Kiwify. Esta oferta não é real.
+  </div>
+
+  <!-- Setup: shown when the URL has no funnel -->
+  <main id="setup" class="setup" hidden>
+    <header class="setup-header">
+      <p class="eyebrow">Kiwify · dev</p>
+      <h1>Mock de página de upsell</h1>
+      <p class="lead">
+        Esta página imita a página de obrigado de um produtor, com o botão de upsell de 1 clique.
+        Monte o funil, copie a URL e cole no produto principal, em
+        <em>Página de obrigado e upsell</em>.
+      </p>
+    </header>
+
+    <div id="setup-error" class="alert alert-error" role="alert" hidden></div>
+
+    <section class="setup-card">
+      <h2>Funil</h2>
+      <ol class="funnel-diagram" aria-label="Etapas do funil">
+        <li><span class="funnel-node">Checkout<br><small>produto principal</small></span></li>
+        <li><span class="funnel-node funnel-node-main">Upsell<br><small>oferta 1</small></span></li>
+        <li>
+          <span class="funnel-branches">
+            <span class="funnel-node">Aceitou → <strong>Upsell 2</strong></span>
+            <span class="funnel-node">Recusou → <strong>Downsell</strong></span>
+          </span>
+        </li>
+        <li><span class="funnel-node">Área de membros<br><small>fim do funil</small></span></li>
+      </ol>
+
+      <form id="setup-form" class="setup-form" novalidate>
+        <label class="field">
+          <span class="field-label">Upsell <span class="required">obrigatório</span></span>
+          <input name="upsell" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: oRA9f06" required>
+          <span class="field-hint">A primeira oferta, mostrada logo após o checkout.</span>
+        </label>
+        <label class="field">
+          <span class="field-label">Upsell 2 <span class="optional">opcional</span></span>
+          <input name="upsell2" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: h19tap2">
+          <span class="field-hint">Mostrada quando o comprador aceita o upsell.</span>
+        </label>
+        <label class="field">
+          <span class="field-label">Downsell <span class="optional">opcional</span></span>
+          <input name="downsell" type="text" autocomplete="off" spellcheck="false" placeholder="ex.: ArEBhhs">
+          <span class="field-hint">Mostrada quando o comprador recusa o upsell.</span>
+        </label>
+
+        <details class="setup-advanced">
+          <summary>Aparência do botão (igual ao Gerador de upsell)</summary>
+          <label class="field">
+            <span class="field-label">Texto aceitar upsell</span>
+            <input name="accept-text" type="text" maxlength="120" placeholder="Sim, eu aceito essa oferta especial!">
+          </label>
+          <label class="field">
+            <span class="field-label">Texto recusar upsell</span>
+            <input name="decline-text" type="text" maxlength="120" placeholder="Não, eu gostaria de recusar essa oferta">
+          </label>
+          <label class="field field-inline">
+            <span class="field-label">Cor do botão</span>
+            <input name="color" type="color" value="#2563eb">
+          </label>
+        </details>
+
+        <p class="field-hint">
+          Use o ID do link de cada oferta. É o código que o <em>Gerador de upsell</em> do dashboard coloca no HTML:
+          <code>kiwify-upsell-trigger-<strong>ID</strong></code>.
+        </p>
+      </form>
+    </section>
+
+    <section class="setup-card">
+      <h2>URL da página de obrigado</h2>
+      <p class="field-hint">Cole esta URL no produto principal. O checkout adiciona <code>token</code>, <code>code_senha</code> e os outros parâmetros.</p>
+      <output id="setup-url" class="setup-url" for="setup-form">Preencha o upsell para gerar a URL.</output>
+      <div class="setup-actions">
+        <button id="setup-copy" class="button" type="button" disabled>Copiar URL</button>
+        <a id="setup-preview" class="button button-secondary" href="#" aria-disabled="true">Abrir prévia sem token</a>
+      </div>
+      <p id="setup-copy-status" class="field-hint" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <!-- Landing: the upsell sales page -->
+  <div id="landing" class="landing" hidden>
+    <div class="top-banner" role="status">
+      <span class="top-banner-icon" aria-hidden="true">✓</span>
+      <span data-bind="banner"></span>
+    </div>
+
+    <nav class="progress" aria-label="Progresso da compra">
+      <ol id="progress-steps"></ol>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow eyebrow-light" data-bind="eyebrow"></p>
+          <h1 id="hero-title"></h1>
+          <p class="hero-subtitle" data-bind="subtitle"></p>
+          <div class="countdown" role="timer" aria-live="off">
+            <span>Esta condição expira em</span>
+            <strong id="countdown">15:00</strong>
+          </div>
+          <a class="button button-accent button-large" href="#oferta">Quero aproveitar esta oferta</a>
+        </div>
+        <div class="hero-media">
+          <div class="product-visual" id="product-visual">
+            <img id="product-image" alt="" hidden>
+            <div class="product-visual-placeholder" id="product-placeholder" aria-hidden="true">
+              <span class="play-button"></span>
+            </div>
+            <span class="product-visual-label" data-bind="product-name">Carregando oferta…</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section">
+        <div class="container">
+          <p class="eyebrow">Por que aproveitar agora</p>
+          <h2 class="section-title">Tudo o que você precisa para ir mais longe</h2>
+          <ul class="benefits">
+            <li class="benefit">
+              <span class="benefit-icon" aria-hidden="true">⚡</span>
+              <h3>Resultado mais rápido</h3>
+              <p>Um passo a passo que complementa o que você acabou de comprar.</p>
+            </li>
+            <li class="benefit">
+              <span class="benefit-icon" aria-hidden="true">🎯</span>
+              <h3>Direto ao ponto</h3>
+              <p>Aulas curtas e práticas, para aplicar no mesmo dia.</p>
+            </li>
+            <li class="benefit">
+              <span class="benefit-icon" aria-hidden="true">🔓</span>
+              <h3>Acesso imediato</h3>
+              <p>O conteúdo entra na mesma área de membros da sua compra.</p>
+            </li>
+            <li class="benefit">
+              <span class="benefit-icon" aria-hidden="true">💳</span>
+              <h3>Compra com 1 clique</h3>
+              <p>Usamos o mesmo pagamento do seu pedido. Sem digitar tudo de novo.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section section-muted">
+        <div class="container container-narrow">
+          <p class="eyebrow">O que está incluído</p>
+          <h2 class="section-title">Você recebe</h2>
+          <ul class="checklist">
+            <li>Módulo bônus com estratégias avançadas</li>
+            <li>Modelos prontos para copiar e usar</li>
+            <li>Aulas ao vivo gravadas</li>
+            <li>Comunidade exclusiva de alunos</li>
+            <li>Certificado de conclusão</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <p class="eyebrow">Depoimentos (fictícios)</p>
+          <h2 class="section-title">Quem aproveitou, recomenda</h2>
+          <ul class="testimonials">
+            <li class="testimonial">
+              <p>“Achei que era só mais um curso, mas o bônus fez toda a diferença no meu resultado.”</p>
+              <span class="testimonial-author">Ana P. · aluna de teste</span>
+            </li>
+            <li class="testimonial">
+              <p>“Comprei com 1 clique, sem digitar o cartão de novo. Muito prático.”</p>
+              <span class="testimonial-author">Carlos M. · aluno de teste</span>
+            </li>
+            <li class="testimonial">
+              <p>“Os modelos prontos me pouparam semanas de trabalho.”</p>
+              <span class="testimonial-author">Juliana R. · aluna de teste</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section section-offer" id="oferta">
+        <div class="container container-narrow">
+          <div class="offer-card">
+            <p class="eyebrow">Oferta exclusiva desta página</p>
+            <h2 class="offer-name" data-bind="product-name">Carregando oferta…</h2>
+            <p class="offer-plan" data-bind="offer-name"></p>
+            <div class="offer-price">
+              <strong data-bind="price"></strong>
+              <span data-bind="installments"></span>
+            </div>
+            <p id="offer-error" class="alert alert-error" role="alert" hidden></p>
+
+            <div id="upsell-widget" class="upsell-widget"></div>
+
+            <ul class="offer-trust">
+              <li>🔒 Pagamento seguro</li>
+              <li>🛡️ Garantia de 7 dias</li>
+              <li>⚡ Acesso imediato</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-muted">
+        <div class="container container-narrow guarantee">
+          <div class="guarantee-seal" aria-hidden="true">7<small>dias</small></div>
+          <div>
+            <h2 class="section-title">Garantia incondicional de 7 dias</h2>
+            <p>Se não gostar, peça o reembolso em até 7 dias. Devolvemos 100% do valor, sem perguntas.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="container container-narrow">
+          <p class="eyebrow">Dúvidas</p>
+          <h2 class="section-title">Perguntas frequentes</h2>
+          <div class="faq">
+            <details>
+              <summary>Vou pagar de novo pelo produto que já comprei?</summary>
+              <p>Não. Esta oferta é um produto adicional. Seu pedido anterior continua aprovado.</p>
+            </details>
+            <details>
+              <summary>Preciso digitar os dados do cartão?</summary>
+              <p>Não. A compra usa o mesmo pagamento do seu pedido. Você só escolhe o parcelamento.</p>
+            </details>
+            <details>
+              <summary>E se eu recusar?</summary>
+              <p>Tudo bem. Você segue para o acesso ao produto que já comprou.</p>
+            </details>
+            <details>
+              <summary>Quando recebo o acesso?</summary>
+              <p>Logo após a confirmação do pagamento, no mesmo e-mail da sua compra.</p>
+            </details>
+          </div>
+          <div class="final-cta">
+            <a class="button button-accent button-large" href="#oferta">Quero aproveitar esta oferta</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Página de teste do funil de upsell da Kiwify (dev). Não é uma oferta real.</p>
+      <p data-bind="company"></p>
+    </footer>
+
+    <details class="dev-panel" id="dev-panel">
+      <summary>🛠️ Dev</summary>
+      <div class="dev-panel-body">
+        <div id="dev-warning" class="alert alert-warning" hidden></div>
+        <h3>Funil</h3>
+        <dl id="dev-funnel" class="dev-list"></dl>
+        <h3>Oferta (API de link)</h3>
+        <dl id="dev-offer" class="dev-list"></dl>
+        <h3>Parâmetros recebidos</h3>
+        <dl id="dev-params" class="dev-list"></dl>
+        <h3>Script</h3>
+        <p class="dev-mono" id="dev-script"></p>
+        <p><a id="dev-setup-link" href="./">Montar outro funil</a></p>
+      </div>
+    </details>
+  </div>
+</body>
+</html>
